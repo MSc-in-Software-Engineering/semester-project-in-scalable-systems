@@ -1,1 +1,182 @@
+name: CI/CD Workflow
 
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+    branches:
+      - main
+      - master
+
+env:
+  SSH_USERNAME: waraz19
+  DOCKER_IMAGE_ENERGINET_CO2_PRODUCER: energinet_co2_producer
+  DOCKER_IMAGE_ENERGINET_CO2_CONSUMER: energinet_co2_consumer
+  PROJECT_NAME: SemesterProjectScalableSystems
+  GROUP_NUMBER: Group01
+
+jobs:
+  # Job to clone repository for consistency across all jobs
+  clone-repository:
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4.0.0
+      - name: Upload Repository artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: repository-artifacts
+          path: .
+      - name: Upload Docker Compose
+        uses: actions/upload-artifact@v3
+        with:
+          name: deployment-artifact
+          path: |
+            ./src/docker-compose.prod.yml
+            ./src/mosquitto.conf
+
+  # Job to perform static code analysis
+  code-analysis:
+    runs-on: ubuntu-latest
+    needs: clone-repository
+    permissions:
+      contents: read
+    continue-on-error: true
+    steps:
+      - name: Download repository artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: repository-artifacts
+          path: .
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y 
+          echo "install your-linting-dependencies"
+      - name: Run Linter / Other Code Analysis tool
+        run: echo "running linter"
+
+  # Job for compiling applications and uploading as an artifact
+  build-application:
+    runs-on: ubuntu-latest
+    needs: clone-repository
+    steps:
+      - name: Download repository artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: repository-artifacts
+          path: .
+      - name: Build application
+        run: echo "build app"
+      - name: Upload Build artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-artifact
+          path: ./src
+
+  # Job for testing the application i.e
+  test-application:
+    runs-on: ubuntu-latest
+    needs: [build-application, code-analysis]
+    continue-on-error: true
+    steps:
+      - name: Download build artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: build-artifact
+          path: ./build
+      - name: Test application
+        run: echo "test"
+
+  # Job to build the energinet producer image
+  build-energinet-co2-producer:
+    runs-on: ubuntu-latest
+    needs: [test-application]
+    permissions:
+      packages: write
+      contents: read
+    steps:
+      - name: Download repository artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: repository-artifacts
+          path: .
+      - name: Login to GitHub Package Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Transform username to lowercase
+        run: echo "OWNER_LOWER=$(echo ${{ github.repository_owner }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+      - name: Build & Push image
+        uses: docker/build-push-action@v3
+        with:
+          context: ./src/kafka/producers/energinet
+          push: true
+          tags: ghcr.io/${{ env.OWNER_LOWER }}/${{ env.DOCKER_IMAGE_ENERGINET_CO2_PRODUCER }}:1.0-${{ github.sha }},ghcr.io/${{ env.OWNER_LOWER }}/${{ env. DOCKER_IMAGE_ENERGINET_CO2_PRODUCER }}:latest
+
+  # Job to build the energinet consumer image
+  build-energinet-co2-consumer:
+    runs-on: ubuntu-latest
+    needs: [test-application]
+    permissions:
+      packages: write
+      contents: read
+    steps:
+      - name: Download repository artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: repository-artifacts
+          path: .
+      - name: Login to GitHub Package Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Transform username to lowercase
+        run: echo "OWNER_LOWER=$(echo ${{ github.repository_owner }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+      - name: Build & Push image
+        uses: docker/build-push-action@v3
+        with:
+          context: ./src/kafka/consumers/energinet
+          push: true
+          tags: ghcr.io/${{ env.OWNER_LOWER }}/${{ env.DOCKER_IMAGE_ENERGINET_CO2_CONSUMER }}:1.0-${{ github.sha }},ghcr.io/${{ env.OWNER_LOWER }}/${{ env.DOCKER_IMAGE_ENERGINET_CO2_CONSUMER }}:latest
+
+
+  # Job to deploy to VM
+  deploy-application:
+    runs-on: self-hosted
+    needs: [build-energinet-co2-producer, build-energinet-co2-consumer]
+    continue-on-error: true
+    steps:
+      - name: Download Deployment Artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: deployment-artifact
+          path: ./src
+
+      - name: Setup SSH Key
+        shell: powershell
+        run: |
+          $env:SSH_PRIVATE_KEY -replace '\\n', "`n" | Out-File -FilePath private_key.pem -Encoding ascii
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Transfer docker-compose to server
+        run: |
+          scp -o StrictHostKeyChecking=no -i ./private_key.pem ./src/docker-compose.prod.yml ${{ env.SSH_USERNAME }}@${{ secrets.SERVER_IP }}:./
+        continue-on-error: true
+      - name: Run docker-compose Down on VM
+        run: |
+          ssh -o StrictHostKeyChecking=no -i private_key.pem ${{ env.SSH_USERNAME }}@${{ secrets.SERVER_IP }} "docker compose -f docker-compose.prod.yml down"
+      - name: Run docker-compose --build up on VM
+        run: |
+          ssh -o StrictHostKeyChecking=no -i private_key.pem ${{ env.SSH_USERNAME }}@${{ secrets.SERVER_IP }} "docker compose -f docker-compose.prod.yml build --no-cache"
+          ssh -o StrictHostKeyChecking=no -i private_key.pem ${{ env.SSH_USERNAME }}@${{ secrets.SERVER_IP }} "docker compose -f docker-compose.prod.yml up -d"
