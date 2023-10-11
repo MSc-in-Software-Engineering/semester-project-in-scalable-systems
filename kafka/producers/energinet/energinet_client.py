@@ -4,7 +4,7 @@ import time
 from confluent_kafka import Producer
 import os
 
-kafka_broker = os.environ.get("KAFKA_BROKER_ADDRESS", "localhost")
+kafka_broker = os.environ.get("KAFKA_BROKER_ADDRESS")
 
 producer_conf = {"bootstrap.servers": kafka_broker, "client.id": "python-producer"}
 
