@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: energinet_co2_producer-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: energinet_co2_producer
+  template:
+    metadata:
+      labels:
+        app: energinet_co2_producer
+    spec:
+      containers:
+        - name: energinet_co2_producer
+          image: ghcr.io/msc-in-software-engineering/energinet_co2_producer:latest
+          environment:
+            - KAFKA_BROKER_ADDRESS=kafka
