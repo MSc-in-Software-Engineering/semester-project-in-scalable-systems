@@ -37,8 +37,7 @@ jobs:
         with:
           name: deployment-artifact
           path: |
-            ./src/docker-compose.prod.yml
-            ./src/mosquitto.conf
+            ./src
 
   # Job to perform static code analysis
   code-analysis:
@@ -169,14 +168,6 @@ jobs:
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
 
-      - name: Transfer docker-compose to server
+      - name: Transfer HDFS directory including Kubernetes manifest files to server
         run: |
-          scp -o StrictHostKeyChecking=no -i ./private_key.pem ./src/docker-compose.prod.yml ${{ env.SSH_USERNAME }}@${{ secrets.SERVER_IP }}:./
-        continue-on-error: true
-      - name: Run docker-compose Down on VM
-        run: |
-          ssh -o StrictHostKeyChecking=no -i private_key.pem ${{ env.SSH_USERNAME }}@${{ secrets.SERVER_IP }} "docker compose -f docker-compose.prod.yml down"
-      - name: Run docker-compose --build up on VM
-        run: |
-          ssh -o StrictHostKeyChecking=no -i private_key.pem ${{ env.SSH_USERNAME }}@${{ secrets.SERVER_IP }} "docker compose -f docker-compose.prod.yml build --no-cache"
-          ssh -o StrictHostKeyChecking=no -i private_key.pem ${{ env.SSH_USERNAME }}@${{ secrets.SERVER_IP }} "docker compose -f docker-compose.prod.yml up -d"
+          scp -o StrictHostKeyChecking=no -i ./private_key.pem -r ./src/hdfs ${{ env.SSH_USERNAME }}@${{ secrets.SERVER_IP }}:./
