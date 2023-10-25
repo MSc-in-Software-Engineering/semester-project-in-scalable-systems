@@ -32,7 +32,7 @@ jobs:
         with:
           name: repository-artifacts
           path: .
-      - name: Upload Docker Compose
+      - name: Upload src
         uses: actions/upload-artifact@v3
         with:
           name: deployment-artifact
