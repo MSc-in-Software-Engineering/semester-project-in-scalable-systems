@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: greenhouse_kafka_connect_producer-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: greenhouse_kafka_connect_producer
+  template:
+    metadata:
+      labels:
+        app: greenhouse_kafka_connect_producer
+    spec:
+      containers:
+        - name: greenhouse_kafka_connect_producer
+          image: ghcr.io/msc-in-software-engineering/greenhouse_kafka_connect_producer:latest
+          environment:
+            - KAFKA_BROKER_ADDRESS=kafka
