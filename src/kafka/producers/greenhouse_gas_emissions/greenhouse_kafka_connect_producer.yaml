@@ -15,5 +15,6 @@ spec:
       containers:
         - name: greenhouse-kafka-connect-producer
           image: ghcr.io/msc-in-software-engineering/greenhouse_producer:latest
-          environment:
-            - KAFKA_BROKER_ADDRESS=kafka
+          env:
+            - name: KAFKA_BROKER_ADDRESS
+              value: "kafka"

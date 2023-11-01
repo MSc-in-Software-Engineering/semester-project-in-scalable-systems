@@ -15,5 +15,6 @@ spec:
       containers:
         - name: greenhouse-consumer
           image: ghcr.io/msc-in-software-engineering/greenhouse_consumer:latest
-          environment:
-            - KAFKA_BROKER_ADDRESS=kafka
+          env:
+            - name: KAFKA_BROKER_ADDRESS
+              value: "kafka"
