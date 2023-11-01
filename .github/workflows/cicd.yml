@@ -229,3 +229,7 @@ jobs:
       - name: Transfer HDFS directory including Kubernetes manifest files to server
         run: |
           scp -o StrictHostKeyChecking=no -i ./private_key.pem -r ./src/hdfs ${{ env.SSH_USERNAME }}@${{ secrets.SERVER_IP }}:./
+      
+      - name: Transfer Kafka directory including Kubernetes manifest files to server
+        run: |
+          scp -o StrictHostKeyChecking=no -i ./private_key.pem -r ./src/kafka ${{ env.SSH_USERNAME }}@${{ secrets.SERVER_IP }}:./
