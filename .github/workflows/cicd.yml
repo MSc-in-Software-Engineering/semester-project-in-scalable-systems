@@ -14,6 +14,8 @@ env:
   SSH_USERNAME: waraz19
   DOCKER_IMAGE_ENERGINET_CO2_PRODUCER: energinet_co2_producer
   DOCKER_IMAGE_ENERGINET_CO2_CONSUMER: energinet_co2_consumer
+  DOCKER_IMAGE_GREENHOUSE_PRODUCER: greenhouse_producer
+  DOCKER_IMAGE_GREENHOUSE_CONSUMER: greenhouse_consumer
   PROJECT_NAME: SemesterProjectScalableSystems
   GROUP_NUMBER: Group01
 
@@ -119,6 +121,7 @@ jobs:
           context: ./src/kafka/producers/energinet
           push: true
           tags: ghcr.io/${{ env.OWNER_LOWER }}/${{ env.DOCKER_IMAGE_ENERGINET_CO2_PRODUCER }}:1.0-${{ github.sha }},ghcr.io/${{ env.OWNER_LOWER }}/${{ env. DOCKER_IMAGE_ENERGINET_CO2_PRODUCER }}:latest
+  
 
   # Job to build the energinet consumer image
   build-energinet-co2-consumer:
@@ -147,7 +150,62 @@ jobs:
           context: ./src/kafka/consumers/energinet
           push: true
           tags: ghcr.io/${{ env.OWNER_LOWER }}/${{ env.DOCKER_IMAGE_ENERGINET_CO2_CONSUMER }}:1.0-${{ github.sha }},ghcr.io/${{ env.OWNER_LOWER }}/${{ env.DOCKER_IMAGE_ENERGINET_CO2_CONSUMER }}:latest
+  
+  # Job to build the greenhouse producer image
+  build-greenhouse-producer:
+    runs-on: ubuntu-latest
+    needs: [test-application]
+    permissions:
+      packages: write
+      contents: read
+    steps:
+      - name: Download repository artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: repository-artifacts
+          path: .
+      - name: Login to GitHub Package Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Transform username to lowercase
+        run: echo "OWNER_LOWER=$(echo ${{ github.repository_owner }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+      - name: Build & Push image
+        uses: docker/build-push-action@v3
+        with:
+          context: ./src/kafka/producers/greenhouse_gas_emissions
+          push: true
+          tags: ghcr.io/${{ env.OWNER_LOWER }}/${{ env.DOCKER_IMAGE_GREENHOUSE_PRODUCER }}:1.0-${{ github.sha }},ghcr.io/${{ env.OWNER_LOWER }}/${{ env. DOCKER_IMAGE_GREENHOUSE_PRODUCER }}:latest
 
+  # Job to build the greenhouse consumer image
+  build-greenhouse-consumer:
+    runs-on: ubuntu-latest
+    needs: [test-application]
+    permissions:
+      packages: write
+      contents: read
+    steps:
+      - name: Download repository artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: repository-artifacts
+          path: .
+      - name: Login to GitHub Package Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Transform username to lowercase
+        run: echo "OWNER_LOWER=$(echo ${{ github.repository_owner }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+      - name: Build & Push image
+        uses: docker/build-push-action@v3
+        with:
+          context: ./src/kafka/consumers/greenhouse_gas_emissions
+          push: true
+          tags: ghcr.io/${{ env.OWNER_LOWER }}/${{ env.DOCKER_IMAGE_GREENHOUSE_CONSUMER }}:1.0-${{ github.sha }},ghcr.io/${{ env.OWNER_LOWER }}/${{ env.DOCKER_IMAGE_GREENHOUSE_CONSUMER }}:latest
 
   # Job to deploy to VM
   deploy-application:
