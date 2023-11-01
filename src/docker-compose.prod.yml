@@ -24,15 +24,15 @@ services:
       ports:
         - 9870:9870
       env_file:
-        - ./hdfs/config
+        - ./config
       environment:
           ENSURE_NAMENODE_DIR: "/tmp/hadoop-root/dfs/name"
-          
+
   datanode:
       image: apache/hadoop:3
       command: ["hdfs", "datanode"]
       env_file:
-        - ./hdfs/config    
+        - ./config    
 
   resourcemanager:
       image: apache/hadoop:3
@@ -41,7 +41,7 @@ services:
       ports:
          - 8088:8088
       env_file:
-        - ./hdfs/config
+        - ./config
       volumes:
         - ./test.sh:/opt/test.sh
 
@@ -49,7 +49,7 @@ services:
       image: apache/hadoop:3
       command: ["yarn", "nodemanager"]
       env_file:
-        - ./hdfs/config
+        - ./config
     
   energinet-co2-producer:
     image: ghcr.io/msc-in-software-engineering/energinet_co2_producer:latest

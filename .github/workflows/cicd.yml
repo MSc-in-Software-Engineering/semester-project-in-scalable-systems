@@ -229,6 +229,9 @@ jobs:
       - name: Transfer docker-compose to server
         run: |
           scp -o StrictHostKeyChecking=no -i ./private_key.pem ./src/docker-compose.prod.yml ${{ env.SSH_USERNAME }}@${{ secrets.SERVER_IP }}:./
+      - name: Transfer HDFS config to server
+        run: |
+          scp -o StrictHostKeyChecking=no -i ./private_key.pem ./src/hdfs/config ${{ env.SSH_USERNAME }}@${{ secrets.SERVER_IP }}:./
         continue-on-error: true
       - name: Run docker-compose Down on VM
         run: |
