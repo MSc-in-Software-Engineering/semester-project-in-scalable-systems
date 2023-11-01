@@ -20,6 +20,7 @@ while True:
             for line in file_reader:
                 data = ','.join(line)
                 producer.produce('greenhouse_topic', value=data.encode('utf-8'))
+                time.sleep(10) 
 
         producer.flush()
     finally:
