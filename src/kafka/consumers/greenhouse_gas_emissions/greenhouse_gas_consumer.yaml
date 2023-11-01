@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: greenhouse_consumer-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: greenhouse_consumer
+  template:
+    metadata:
+      labels:
+        app: greenhouse_consumer
+    spec:
+      containers:
+        - name: greenhouse_consumer
+          image: ghcr.io/msc-in-software-engineering/greenhouse_consumer:latest
+          environment:
+            - KAFKA_BROKER_ADDRESS=kafka
