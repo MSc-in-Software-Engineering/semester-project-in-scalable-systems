@@ -37,21 +37,29 @@ services:
 
 # Spark
 
-  spark:
-    build: 
-      context: ./spark
-      dockerfile: Dockerfile
+  spark-master:
+    image: docker.io/bitnami/spark:3.3
     environment:
       - SPARK_MODE=master
       - SPARK_RPC_AUTHENTICATION_ENABLED=no
       - SPARK_RPC_ENCRYPTION_ENABLED=no
       - SPARK_LOCAL_STORAGE_ENCRYPTION_ENABLED=no
       - SPARK_SSL_ENABLED=no
-      - KAFKA_BROKER_ADDRESS=kafka
+      - KAFKA_BROKER_ADDRESS=kafka:9092
     ports:
       - '8080:8080'
-    depends_on:
-      - kafka
+
+  spark-worker:
+    image: docker.io/bitnami/spark:3.3
+    environment:
+      - SPARK_MODE=worker
+      - SPARK_MASTER_URL=spark://spark-master:7077
+      - SPARK_WORKER_MEMORY=2GN
+      - SPARK_WORKER_CORES=1
+      - SPARK_RPC_AUTHENTICATION_ENABLED=no
+      - SPARK_RPC_ENCRYPTION_ENABLED=no
+      - SPARK_LOCAL_STORAGE_ECRYPTION_ENABLED=no
+      - SPARK_SSL_ENABLED=no
 
   jupyterlab:
     image: jupyter/all-spark-notebook
