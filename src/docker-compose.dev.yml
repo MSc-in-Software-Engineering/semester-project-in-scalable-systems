@@ -52,7 +52,18 @@ services:
       - '8080:8080'
     depends_on:
       - kafka
+
+  jupyterlab:
+    image: jupyter/all-spark-notebook
+    ports:
+      - 8888:8888
+    volumes:
+      - shared-workspace:/opt/workspace
+      - ./local/notebooks:/opt/workspace/notebooks
+    command: "start-notebook.sh --NotebookApp.token='' --NotebookApp.password=''"
       
 volumes:
   kafka_data:
+    driver: local
+  shared-workspace:
     driver: local
