@@ -207,7 +207,7 @@ jobs:
           push: true
           tags: ghcr.io/${{ env.OWNER_LOWER }}/${{ env.DOCKER_IMAGE_GREENHOUSE_CONSUMER }}:1.0-${{ github.sha }},ghcr.io/${{ env.OWNER_LOWER }}/${{ env.DOCKER_IMAGE_GREENHOUSE_CONSUMER }}:latest
 
-  # Job to deploy to VM
+# Job to deploy to VM
   deploy-application:
     runs-on: self-hosted
     needs: [build-energinet-co2-producer, build-energinet-co2-consumer]
@@ -229,7 +229,3 @@ jobs:
       - name: Transfer HDFS directory including Kubernetes manifest files to server
         run: |
           scp -o StrictHostKeyChecking=no -i ./private_key.pem -r ./src/hdfs ${{ env.SSH_USERNAME }}@${{ secrets.SERVER_IP }}:./
-      
-      - name: Transfer Kafka directory including Kubernetes manifest files to server
-        run: |
-          scp -o StrictHostKeyChecking=no -i ./private_key.pem -r ./src/kafka ${{ env.SSH_USERNAME }}@${{ secrets.SERVER_IP }}:./
