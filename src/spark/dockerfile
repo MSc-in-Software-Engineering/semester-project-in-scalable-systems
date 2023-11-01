@@ -1,0 +1,3 @@
+FROM bitnami/spark:latest
+
+COPY structured_streaming.py .
