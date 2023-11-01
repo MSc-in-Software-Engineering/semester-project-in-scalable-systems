@@ -1,5 +1,6 @@
 from confluent_kafka import Producer
 import csv
+import time
 import os
 
 kafka_broker = os.environ.get("KAFKA_BROKER_ADDRESS")
