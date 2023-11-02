@@ -16,6 +16,7 @@ env:
   DOCKER_IMAGE_ENERGINET_CO2_CONSUMER: energinet_co2_consumer
   DOCKER_IMAGE_GREENHOUSE_PRODUCER: greenhouse_producer
   DOCKER_IMAGE_GREENHOUSE_CONSUMER: greenhouse_consumer
+  DOCKER_IMAGE_SPARK: spark
   PROJECT_NAME: SemesterProjectScalableSystems
   GROUP_NUMBER: Group01
 
