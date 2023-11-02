@@ -1,5 +1,6 @@
 from confluent_kafka import Consumer, KafkaError
 import os
+from time import sleep
 
 kafka_broker = os.environ.get("KAFKA_BROKER_ADDRESS", "localhost")
 
@@ -29,5 +30,7 @@ while True:
     else:
         message_value = msg.value().decode("utf-8")
         print("Received message: {}".format(message_value))
+        
+    sleep(5)
         
 consumer.close()

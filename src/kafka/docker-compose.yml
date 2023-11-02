@@ -19,7 +19,7 @@ services:
 
   energinet-co2-producer:
     build: 
-      context: ./kafka/producers/energinet
+      context: ./producers/energinet
       dockerfile: Dockerfile
     environment:
       - KAFKA_BROKER_ADDRESS=kafka
@@ -28,7 +28,25 @@ services:
 
   energinet-co2-consumer:
     build: 
-      context: ./kafka/consumers/energinet
+      context: ./consumers/energinet
+      dockerfile: Dockerfile
+    environment:
+      - KAFKA_BROKER_ADDRESS=kafka
+    depends_on:
+      - kafka
+
+  greenhouse-producer:
+    build: 
+      context: ./producers/greenhouse_gas_emissions
+      dockerfile: Dockerfile
+    environment:
+      - KAFKA_BROKER_ADDRESS=kafka
+    depends_on:
+      - kafka
+
+  greenhouse-consumer:
+    build: 
+      context: ./consumers/greenhouse_gas_emissions
       dockerfile: Dockerfile
     environment:
       - KAFKA_BROKER_ADDRESS=kafka

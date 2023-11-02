@@ -26,7 +26,7 @@ services:
     ports:
       - 9870:9870
     env_file:
-      - ./config
+      - ./hdfs/config
     environment:
       ENSURE_NAMENODE_DIR: "/tmp/hadoop-root/dfs/name"
 
@@ -34,7 +34,7 @@ services:
     image: apache/hadoop:3
     command: ["hdfs", "datanode"]
     env_file:
-      - ./config    
+      - ./hdfs/config    
 
   resourcemanager:
     image: apache/hadoop:3
@@ -43,7 +43,7 @@ services:
     ports:
         - 8088:8088
     env_file:
-      - ./config
+      - ./hdfs/config
     volumes:
       - ./test.sh:/opt/test.sh
 
@@ -51,18 +51,56 @@ services:
     image: apache/hadoop:3
     command: ["yarn", "nodemanager"]
     env_file:
-      - ./config
-    
-  ### Producers  
+      - ./hdfs/config
+
+  ### Spark
+  spark-master:
+    image: docker.io/bitnami/spark:3.3
+    environment:
+      - SPARK_MODE=master
+      - SPARK_RPC_AUTHENTICATION_ENABLED=no
+      - SPARK_RPC_ENCRYPTION_ENABLED=no
+      - SPARK_LOCAL_STORAGE_ENCRYPTION_ENABLED=no
+      - SPARK_SSL_ENABLED=no
+      - KAFKA_BROKER_ADDRESS=kafka:9092
+    ports:
+      - '8080:8080'
+
+  spark-worker:
+    image: docker.io/bitnami/spark:3.3
+    environment:
+      - SPARK_MODE=worker
+      - SPARK_MASTER_URL=spark://spark-master:7077
+      - SPARK_WORKER_MEMORY=2GN
+      - SPARK_WORKER_CORES=1
+      - SPARK_RPC_AUTHENTICATION_ENABLED=no
+      - SPARK_RPC_ENCRYPTION_ENABLED=no
+      - SPARK_LOCAL_STORAGE_ECRYPTION_ENABLED=no
+      - SPARK_SSL_ENABLED=no
+
+  jupyterlab:
+    image: jupyter/all-spark-notebook
+    ports:
+      - 8888:8888
+    volumes:
+      - shared-workspace:/opt/workspace
+      - ./local/notebooks:/opt/workspace/notebooks
+    command: "start-notebook.sh --NotebookApp.token='' --NotebookApp.password=''"
+
+  ### Producers
   energinet-co2-producer:
-    image: ghcr.io/msc-in-software-engineering/energinet_co2_producer:latest
+    build: 
+      context: ./kafka/producers/energinet
+      dockerfile: Dockerfile
     environment:
       - KAFKA_BROKER_ADDRESS=kafka
     depends_on:
       - kafka
 
   greenhouse-producer:
-    image: ghcr.io/msc-in-software-engineering/greenhouse_producer:latest
+    build: 
+      context: ./kafka/producers/greenhouse_gas_emissions
+      dockerfile: Dockerfile
     environment:
       - KAFKA_BROKER_ADDRESS=kafka
     depends_on:
@@ -70,22 +108,25 @@ services:
 
   ### Consumers
   energinet-co2-consumer:
-    image: ghcr.io/msc-in-software-engineering/energinet_co2_consumer:latest
+    build: 
+      context: ./kafka/consumers/energinet
+      dockerfile: Dockerfile
     environment:
       - KAFKA_BROKER_ADDRESS=kafka
     depends_on:
       - kafka
 
   greenhouse-consumer:
-    image: ghcr.io/msc-in-software-engineering/greenhouse_consumer:latest
+    build: 
+      context: ./kafka/consumers/greenhouse_gas_emissions
+      dockerfile: Dockerfile
     environment:
       - KAFKA_BROKER_ADDRESS=kafka
     depends_on:
       - kafka
-
+      
 volumes:
   kafka_data:
     driver: local
   shared-workspace:
     driver: local
-  
