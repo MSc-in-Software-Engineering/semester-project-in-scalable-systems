@@ -55,7 +55,7 @@ services:
     
   ### Spark
   spark-master:
-    image: docker.io/bitnami/spark:3.3
+    image: ghcr.io/msc-in-software-engineering/spark:latest
     environment:
       - SPARK_MODE=master
       - SPARK_RPC_AUTHENTICATION_ENABLED=no
