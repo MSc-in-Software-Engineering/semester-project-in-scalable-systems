@@ -258,9 +258,12 @@ jobs:
       - name: Transfer docker-compose to server
         run: |
           scp -o StrictHostKeyChecking=no -i ./private_key.pem ./src/docker-compose.prod.yml ${{ env.SSH_USERNAME }}@${{ secrets.SERVER_IP }}:./
-      - name: Transfer HDFS config to server
+      - name: Transfer HDFS and Hive config to server
         run: |
-          scp -o StrictHostKeyChecking=no -i ./private_key.pem ./src/hdfs/config ${{ env.SSH_USERNAME }}@${{ secrets.SERVER_IP }}:./
+          scp -o StrictHostKeyChecking=no -i ./private_key.pem ./src/hdfs/hadoop-hive.env ${{ env.SSH_USERNAME }}@${{ secrets.SERVER_IP }}:./
+      - name: Transfer Superset config to server
+        run: |
+          scp -o StrictHostKeyChecking=no -i ./private_key.pem ./src/superset/superset_config.py ${{ env.SSH_USERNAME }}@${{ secrets.SERVER_IP }}:./
         continue-on-error: true
       - name: Run docker-compose Down on VM
         run: |
