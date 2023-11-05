@@ -24,4 +24,11 @@ The VM utilized for this repository in which deployment is being made is on the 
 
 At last, ensure that a VPN connection to SDU's network is established.
 
-Wahid
+## Links
+- HDFS namenode open on port 50070 (http://localhost:50070/)
+- HDFS datanode open on port 50075 (Doesn't have UI)
+- Hive server open on port 10000 (Doesn't have UI)
+- Hive metastore open on port 9083 (Doesn't have UI)
+- Spark master open on port 8080 (Doesn't have UI)
+- Jupyterlav for spark open on port 8888 (http://localhost:8888/)
+- Superset open on port 8088 (http://localhost:8088/)

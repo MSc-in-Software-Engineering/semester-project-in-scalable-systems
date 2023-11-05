@@ -20,38 +20,63 @@ services:
 
   ### HDFS
   namenode:
-    image: apache/hadoop:3
-    hostname: namenode
-    command: ["hdfs", "namenode"]
-    ports:
-      - 9870:9870
-    env_file:
-      - ./hdfs/config
+    image: bde2020/hadoop-namenode:2.0.0-hadoop2.7.4-java8
+    volumes:
+      - namenode:/hadoop/dfs/name
     environment:
-      ENSURE_NAMENODE_DIR: "/tmp/hadoop-root/dfs/name"
+      - CLUSTER_NAME=test
+    env_file:
+      - ./hadoop-hive.env
+    ports:
+      - "50070:50070"
 
   datanode:
-    image: apache/hadoop:3
-    command: ["hdfs", "datanode"]
-    env_file:
-      - ./hdfs/config    
-
-  resourcemanager:
-    image: apache/hadoop:3
-    hostname: resourcemanager
-    command: ["yarn", "resourcemanager"]
-    ports:
-        - 8088:8088
-    env_file:
-      - ./hdfs/config
+    image: bde2020/hadoop-datanode:2.0.0-hadoop2.7.4-java8
     volumes:
-      - ./test.sh:/opt/test.sh
-
-  nodemanager:
-    image: apache/hadoop:3
-    command: ["yarn", "nodemanager"]
+      - datanode:/hadoop/dfs/data
     env_file:
-      - ./hdfs/config
+      - ./hadoop-hive.env
+    environment:
+      SERVICE_PRECONDITION: "namenode:50070"
+    ports:
+      - "50075:50075"
+
+  ### Hive
+  hive-server:
+    image: bde2020/hive:2.3.2-postgresql-metastore
+    env_file:
+      - ./hadoop-hive.env
+    environment:
+      HIVE_CORE_CONF_javax_jdo_option_ConnectionURL: "jdbc:postgresql://hive-metastore/metastore"
+      SERVICE_PRECONDITION: "hive-metastore:9083"
+    ports:
+      - "10000:10000"
+
+  hive-metastore:
+    image: bde2020/hive:2.3.2-postgresql-metastore
+    env_file:
+      - ./hadoop-hive.env
+    command: /opt/hive/bin/hive --service metastore
+    environment:
+      SERVICE_PRECONDITION: "namenode:50070 datanode:50075 hive-metastore-postgresql:5432"
+    ports:
+      - "9083:9083"
+
+  ### Superset
+  superset:
+    image: apache/superset:2.1.0
+    container_name: superset
+    environment:
+      - SUPERSET_CONFIG_PATH=/etc/superset/superset_config.py
+    volumes:
+      - ./superset_config.py:/etc/superset/superset_config.py
+    ports:
+      - "8088:8088"
+    depends_on:
+      - namenode
+      - datanode
+      - hive-server
+      - hive-metastore
 
   ### Spark
   spark-master:
@@ -126,6 +151,8 @@ services:
       - kafka
       
 volumes:
+  namenode:
+  datanode:
   kafka_data:
     driver: local
   shared-workspace:
