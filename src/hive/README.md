@@ -24,7 +24,7 @@ In Hive, a "database" is a logical container for tables, similar to a namespace 
     ```
 1.  Setup table
     ```
-    CREATE EXTERNAL TABLE csv_table (
+    CREATE EXTERNAL TABLE table_name (
         column1 STRING,
         column2 INT,
         -- Define columns matching the structure of your CSV
@@ -32,4 +32,16 @@ In Hive, a "database" is a logical container for tables, similar to a namespace 
     ROW FORMAT DELIMITED
     FIELDS TERMINATED BY ','
     LOCATION '/user/your_hdfs_directory/';
+    ```
+1. Drop table if needed
+    ```
+    DROP TABLE table_name;
+    ```
+1. Drop database if needed
+    ```
+    DROP DATABASE database_name;
+    ```
+1. Select results from the table structure created querying HDFS
+    ```
+    SELECT * FROM table_name;
     ```
