@@ -6,6 +6,9 @@ import logging
 
 kafka_broker = os.environ.get("KAFKA_BROKER_ADDRESS","localhost:9092")
 
+hdfs_host = os.environ.get("HDFS_ADDRESS_AND_PORT")
+hdfs_path = os.environ.get("HDFS_PATH")
+
 # Create spark session
 spark = SparkSession \
     .builder \
@@ -53,7 +56,8 @@ final_df = exploded_df.select(
 )
 
 # Write result into console later this will be directed into the hdfs
-query = final_df.writeStream.outputMode("append").format("console").start()
+#query = final_df.writeStream.outputMode("append").format("console").start()
+query = final_df.writeStream.format("avro").option("checkpointLocation", "/tmp/checkpoint-location").outputMode("append").option("path", "hdfs://" + hdfs_host + hdfs_path).start()
 
 # Listen for termination
 query.awaitTermination()
