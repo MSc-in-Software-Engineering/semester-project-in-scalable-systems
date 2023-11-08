@@ -239,7 +239,7 @@ jobs:
 # Job to deploy to VM
   deploy-application:
     runs-on: self-hosted
-    needs: [build-energinet-co2-producer, build-energinet-co2-consumer]
+    needs: [build-energinet-co2-producer, build-energinet-co2-consumer, build-spark, build-greenhouse-producer, build-greenhouse-consumer]
     continue-on-error: true
     steps:
       - name: Download Deployment Artifacts
