@@ -55,6 +55,9 @@ final_df = exploded_df.select(
     col("record.CO2Emission").alias("CO2Emission")
 )
 
+print(hdfs_path)
+print(hdfs_host)
+
 # Write result into console later this will be directed into the hdfs
 #query = final_df.writeStream.outputMode("append").format("console").start()
 query = final_df.writeStream.format("avro").option("checkpointLocation", "/tmp/checkpoint-location").outputMode("append").option("path", hdfs_host + hdfs_path).start()
