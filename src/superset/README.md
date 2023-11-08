@@ -6,7 +6,7 @@ When starting up the container for the first time, do the following:
     ...
         openssl rand -base64 42
     ...
-    
+
 1. Setup your local admin account
 
     ```
@@ -66,6 +66,6 @@ When starting up the container for the first time, do the following:
         1. Select Apache Hive
         1. Enter the following SQL Alchemy URI
             ```
-            hive://hive@hive-server:10000/emissions
+            hive://hive@hive-server:10000/semesterproject
             ```
     - It should now be connected.
