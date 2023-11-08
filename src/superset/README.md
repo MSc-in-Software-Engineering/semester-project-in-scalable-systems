@@ -2,11 +2,12 @@
 
 When starting up the container for the first time, do the following:
 
-1. Setup the private key inside the superset_config.py, run the command below and remeber to have the secret key as uppercase.
-    ...
-        openssl rand -base64 42
-    ...
-
+1. Setup the private key inside the superset_config.py, run the command below and remember to have the secret key as uppercase.
+    
+    ```
+    openssl rand -base64 42
+    ```
+    
 1. Setup your local admin account
 
     ```
