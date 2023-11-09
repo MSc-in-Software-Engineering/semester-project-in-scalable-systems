@@ -22,3 +22,7 @@ To transfer files from host directly to HDFS, you will need to do the following
     ```
     http://localhost:50070/explorer.html#/
     ```
+- (optional) delete file/directory within HDFS
+    ```
+    hadoop fs -rm -r [location in HDFS]
+    ```
