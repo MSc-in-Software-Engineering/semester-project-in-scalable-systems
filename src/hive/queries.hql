@@ -126,5 +126,22 @@ ROW FORMAT DELIMITED
 FIELDS TERMINATED BY ';'
 LOCATION '/user/wdi/';
 
+CREATE EXTERNAL TABLE IF NOT EXISTS avro_records_table
+ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.avro.AvroSerDe'
+WITH SERDEPROPERTIES (
+  'avro.schema.literal'='{
+    "type": "record",
+    "name": "CO2Record",
+    "fields": [
+      {"name": "Minutes5UTC", "type": "string"},
+      {"name": "Minutes5DK", "type": "string"},
+      {"name": "PriceArea", "type": "string"},
+      {"name": "CO2Emission", "type": "double"}
+    ]
+  }'
+)
+STORED AS
+  INPUTFORMAT 'org.apache.hadoop.hive.ql.io.avro.AvroContainerInputFormat'
+  OUTPUTFORMAT 'org.apache.hadoop.hive.ql.io.avro.AvroContainerOutputFormat'
 
-
+LOCATION '/user/emissions/energinet/';
