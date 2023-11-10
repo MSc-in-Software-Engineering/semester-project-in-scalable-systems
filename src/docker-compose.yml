@@ -83,7 +83,9 @@ services:
 
   ### Spark
   spark-master:
-    image: docker.io/bitnami/spark:3.3
+    build: 
+      context: ./spark/
+      dockerfile: Dockerfile
     environment:
       - SPARK_MODE=master
       - SPARK_RPC_AUTHENTICATION_ENABLED=no
