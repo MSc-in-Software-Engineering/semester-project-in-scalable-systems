@@ -1,3 +1,3 @@
-FROM bitnami/spark:latest
+FROM bitnami/spark:3.3
 
 COPY structured_streaming.py .
