@@ -731,5 +731,40 @@ ROW FORMAT DELIMITED
 FIELDS TERMINATED BY ','
 LOCATION '/user/emissions/power/country_other-energy-use_emissions';
 
+CREATE EXTERNAL TABLE IF NOT EXISTS world_development_indicators (
+  country_name STRING,
+  country_code STRING,
+  series_name STRING,
+  series_code STRING,
+  year_2015 INT,
+  year_2016 INT,
+  year_2017 INT,
+  year_2018 INT,
+  year_2019 INT,
+  year_2020 INT,
+  year_2021 INT,
+  year_2022 INT
+)
+ROW FORMAT DELIMITED
+FIELDS TERMINATED BY ';'
+LOCATION '/user/wdi/';
 
+CREATE EXTERNAL TABLE IF NOT EXISTS avro_records_table
+ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.avro.AvroSerDe'
+WITH SERDEPROPERTIES (
+  'avro.schema.literal'='{
+    "type": "record",
+    "name": "CO2Record",
+    "fields": [
+      {"name": "Minutes5UTC", "type": "string"},
+      {"name": "Minutes5DK", "type": "string"},
+      {"name": "PriceArea", "type": "string"},
+      {"name": "CO2Emission", "type": "double"}
+    ]
+  }'
+)
+STORED AS
+  INPUTFORMAT 'org.apache.hadoop.hive.ql.io.avro.AvroContainerInputFormat'
+  OUTPUTFORMAT 'org.apache.hadoop.hive.ql.io.avro.AvroContainerOutputFormat'
 
+LOCATION '/user/emissions/energinet/';

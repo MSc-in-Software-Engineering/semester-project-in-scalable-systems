@@ -13,7 +13,7 @@ cd
 Then run this:
 
 ```
-spark-submit --packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.2.0 structured_streaming.py
+spark-submit --packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.2.0,org.apache.spark:spark-avro_2.12:3.3.2 structured_streaming.py
 ```
 
 Now the container should output the converted data in parquet format
